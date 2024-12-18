@@ -1,5 +1,14 @@
 import streamlit as st
 from streamlit_extras.let_it_rain import rain 
+from flask import Flask
+from pymongo import MongoClient
+
+
+client = MongoClient("mongodb://kafka:KAFKA123test@ac-melappl-shard-00-00.w9koftb.mongodb.net:27017,ac-melappl-shard-00-01.w9koftb.mongodb.net:27017,ac-melappl-shard-00-02.w9koftb.mongodb.net:27017/?replicaSet=atlas-tzu88p-shard-0&ssl=true&authSource=admin")
+db = client['Pampujosiyam']
+collection = db['secretedata'] 
+
+app = Flask(__name__)
 
 def flames(name1, name2):
     male_split = [*name1]
@@ -63,6 +72,16 @@ def show_animation(result):
             falling_speed=5,
             animation_length="5s",
         )
+   
+def store_data(male_name, female_name, result, count):
+    data = {
+        "Malename": male_name,
+        "Femalename": female_name,
+        "Result": result,
+        "Love_meter": count
+    }
+    collection.insert_one(data)
+    
 
 st.title("PAAMPU JOSIYAM")
 
@@ -79,8 +98,12 @@ if st.button("MERGE"):
         if Love_meter < 5:
             st.write("Not Work")
         elif Love_meter ==5:
-            st.write("Good")
+             st.write("Good")
         elif Love_meter >=6:
-            st.write("Strong")
+             st.write("Strong")
+
+        store_data(male_name, female_name, result, Love_meter)
+        
+        stored_data = list(collection.find())
     else:
         st.warning("Please enter both names to play the game.")
